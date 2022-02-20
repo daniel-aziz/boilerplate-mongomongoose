@@ -3,26 +3,54 @@ const mongoose = require('mongoose')
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-let Person;
+const personSchema = new mongoose.Schema({
+  name:String, 
+  age:Number,
+  favoriteFoods:[String]
+  
+})
+
+
+let Person = mongoose.model("Person",personSchema);
+
 
 const createAndSavePerson = (done) => {
-  done(null /*, data*/);
+  let person1 = new Person({name:"daniel",age:25,favoriteFoods:["pizza","wine"]})
+  person1.save((err,data)=>{
+        if (err) return console.log(err);
+     done(null, data)
+  })
+  
 };
 
-const createManyPeople = (arrayOfPeople, done) => {
-  done(null /*, data*/);
+const createManyPeople = (arrayOfPeople, done) => {  
+  Person.create(arrayOfPeople, (err,data)=>{
+        if (err) return console.log(err);
+     done(null, data)
+  })
 };
+
+
 
 const findPeopleByName = (personName, done) => {
-  done(null /*, data*/);
+  Person.find({name: personName},  (err, data) => {
+    if (err) return console.log(err);
+    done(null, data);
+  });
 };
 
 const findOneByFood = (food, done) => {
-  done(null /*, data*/);
+  Person.findOne({favoriteFoods:food }, (err,data)=>{
+    if (err) return console.log(err)
+    done(null, data)
+  })
 };
 
 const findPersonById = (personId, done) => {
-  done(null /*, data*/);
+    Person.findById({_id:personId}, (err,data)=>{
+    if (err) return console.log(err)
+    done(null, data)
+  })
 };
 
 const findEditThenSave = (personId, done) => {
