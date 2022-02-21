@@ -3,15 +3,15 @@ const mongoose = require('mongoose')
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-const personSchema = new mongoose.Schema({
+const personSchema = mongoose.Schema({
   name:String, 
   age:Number,
   favoriteFoods:[String]
   
 })
 
+const Person = mongoose.model("Person",personSchema); 
 
-let Person = mongoose.model("Person",personSchema);
 
 
 const createAndSavePerson = (done) => {
@@ -55,30 +55,54 @@ const findPersonById = (personId, done) => {
 
 const findEditThenSave = (personId, done) => {
   const foodToAdd = "hamburger";
+  Person.findById({_id:personId}, (err, data)=>{
+    if (err) return console.log(err) 
+    const person = data;
+    person.favoriteFoods.push(foodToAdd)
+    person.save((err,data)=>{
+          if (err) return console.log(err) 
+          done(null, data)
 
-  done(null /*, data*/);
+    })
+
+  })
 };
 
 const findAndUpdate = (personName, done) => {
   const ageToSet = 20;
-
-  done(null /*, data*/);
+  Person.findOneAndUpdate({name:personName},{age:ageToSet},{ new: true }, (err,data)=>{
+          if (err) return console.log(err) 
+          done(null, data)
+    })
+  
 };
 
 const removeById = (personId, done) => {
-  done(null /*, data*/);
+  Person.deleteOne({_id:personId},(err,data)=>{
+          if (err) return console.log(err) 
+          done(null, data)
+    })
 };
 
 const removeManyPeople = (done) => {
   const nameToRemove = "Mary";
-
-  done(null /*, data*/);
+  Person.deleteOne({name:nameToRemove},(err,data)=>{
+    if (err) return console.log(err)
+    done(null,data)
+  })
+  
 };
 
-const queryChain = (done) => {
+const queryChain = function(done) {
   const foodToSearch = "burrito";
+  Person.find({favoriteFoods : {$all: [foodToSearch]}})
+    .sort({name: 'asc'})
+    .limit(2)
+    .select('-age')
+    .exec((err, data) => {
+    err ? console.log(err): done (null, data) 
+  })
 
-  done(null /*, data*/);
 };
 
 /** **Well Done !!**
